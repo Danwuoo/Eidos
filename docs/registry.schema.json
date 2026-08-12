@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eidos.local/schemas/document-registry-v1.json",
+  "title": "Eidos document registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "documents"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "documents": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/document"}
+    }
+  },
+  "$defs": {
+    "relation_list": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^(GOV|RFC|ADR|SPEC|EXP|NOTE)-[0-9]{4}$"}
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "title", "type", "status", "path", "language", "summary",
+        "depends_on", "supersedes", "informed_by"
+      ],
+      "properties": {
+        "id": {"type": "string"},
+        "title": {"type": "string", "minLength": 1},
+        "type": {
+          "enum": ["governance", "rfc", "adr", "specification", "experiment", "note"]
+        },
+        "status": {"type": "string"},
+        "path": {
+          "type": "string",
+          "pattern": "^docs/[A-Za-z0-9._/-]+\\.md$"
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$"
+        },
+        "summary": {"type": "string", "minLength": 1},
+        "depends_on": {"$ref": "#/$defs/relation_list"},
+        "supersedes": {"$ref": "#/$defs/relation_list"},
+        "informed_by": {"$ref": "#/$defs/relation_list"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "governance"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^GOV-[0-9]{4}$"},
+              "status": {"enum": ["active", "superseded", "archived"]},
+              "path": {"pattern": "^docs/governance/GOV-[0-9]{4}-[a-z0-9-]+\\.md$"},
+              "language": {"const": "en"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "rfc"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^RFC-[0-9]{4}$"},
+              "status": {"enum": ["draft", "in_review", "accepted", "rejected", "withdrawn"]},
+              "path": {"pattern": "^docs/rfcs/RFC-[0-9]{4}-[a-z0-9-]+\\.md$"},
+              "language": {"const": "en"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "adr"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^ADR-[0-9]{4}$"},
+              "status": {"enum": ["proposed", "accepted", "deprecated", "superseded"]},
+              "path": {"pattern": "^docs/decisions/ADR-[0-9]{4}-[a-z0-9-]+\\.md$"},
+              "language": {"const": "en"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "specification"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^SPEC-[0-9]{4}$"},
+              "status": {"enum": ["draft", "active", "deprecated", "superseded"]},
+              "path": {"pattern": "^docs/specifications/SPEC-[0-9]{4}-[a-z0-9-]+\\.md$"},
+              "language": {"const": "en"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "experiment"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^EXP-[0-9]{4}$"},
+              "status": {"enum": ["planned", "running", "completed", "abandoned"]},
+              "path": {"pattern": "^docs/experiments/EXP-[0-9]{4}-[a-z0-9-]+\\.md$"},
+              "language": {"const": "en"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"type": {"const": "note"}}, "required": ["type"]},
+          "then": {
+            "properties": {
+              "id": {"pattern": "^NOTE-[0-9]{4}$"},
+              "status": {"const": "archived"},
+              "path": {"pattern": "^docs/notes/[A-Za-z0-9.-]+\\.md$"}
+            }
+          }
+        }
+      ]
+    }
+  }
+}
