@@ -22,6 +22,15 @@
 - No CI, research code, dataset, experiment implementation, or formal research specification is added in this plan.
 - Planning files under `docs/superpowers/` are non-normative and excluded from the registry.
 
+## Authorized Preflight Rulings
+
+The user approved these rulings on 2026-08-13 after the execution preflight. They override any conflicting task snippet below:
+
+1. Preserve the approved note path `docs/notes/early-arc-specialized-reasoning-concept.zh-TW.md`. The note-path schema pattern MUST allow the uppercase region subtag in `zh-TW`.
+2. Do not create `tests/docs/test_repository_contract.py` and do not add tests that assert literal prose, headings, or source text in README, governance, template, note, or `AGENTS.md` files. Keep behavior tests for the registry validator. Reviewers verify human and agent documentation directly against the design and task requirements.
+3. JSON Schema owns rejection of absolute, backslash, and traversal path syntax. Task 1 MUST include a schema behavior test for traversal syntax. Python owns filesystem existence, governed-file coverage, and resolved-path containment. Task 2 MUST test the resolved-path containment helper directly; it MUST NOT add an end-to-end test that already passes through schema rejection.
+4. Final range-based checks and the whole-branch review use the recorded execution base `20f3ee9`, not `HEAD~5`, because review fixes may add commits.
+
 ---
 
 ## File Map
@@ -272,7 +281,7 @@ Create `docs/registry.schema.json` with:
             "properties": {
               "id": {"pattern": "^NOTE-[0-9]{4}$"},
               "status": {"const": "archived"},
-              "path": {"pattern": "^docs/notes/[a-z0-9.-]+\\.md$"}
+              "path": {"pattern": "^docs/notes/[A-Za-z0-9.-]+\\.md$"}
             }
           }
         }
@@ -1530,7 +1539,7 @@ After all task commits, run from the repository root:
 ```powershell
 python tools/docs/validate.py
 python -m unittest discover -s tests/docs -v
-git diff --check HEAD~5..HEAD
+git diff --check 20f3ee9..HEAD
 git status --short --branch
 ```
 
@@ -1538,7 +1547,7 @@ Expected:
 
 - Validator prints `Documentation validation passed.`
 - All tests pass.
-- The five implementation commits contain no whitespace errors.
+- Every commit after the recorded execution base contains no whitespace errors.
 - The working tree is clean.
 - The only registered documents are `GOV-0001` and `NOTE-0001`.
 - No formal research architecture, roadmap, or technology selection has been approved.
